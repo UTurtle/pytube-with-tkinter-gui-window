@@ -35,7 +35,7 @@ def app():
 
     # Constant
     unknown = "unknown"
-    custom_font = 'Helvetica'
+    custom_font = 'Segoe ui'
 
     # Variable
     is_audio = BooleanVar()
@@ -247,9 +247,9 @@ def app():
 
                 caption = yt.captions['ko']
                 if caption is None:
-                    caption = yt.captions['ko']
+                    caption = yt.captions['en']
                     if caption is None:
-                        print(f"[실패] {yt.title}는 한글(또는 영어) 자막이 없습니다!")
+                        info(f"{yt.title}는 한글(또는 영어) 자막이 없습니다!")
                         return -1
 
                 f = open(f"{yt.download_path}/{yt.title}.smi", "w", encoding="UTF-8")
@@ -272,14 +272,14 @@ def app():
                 f.close()
 
             sema.acquire()
-            info(f"{yt.title}를 다운받습니다. \n길이는 {hourMinuteSecond(yt.length)} 입니다.", level="INFO")
+            info(f"{yt.title}을(를) 다운받습니다. \n길이는 {hourMinuteSecond(yt.length)} 입니다.", level="INFO")
 
             # 파일 스트리밍
             try:
                 streams = yt.streams
                 video = streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
             except PytubeError as e:
-                info(f"{yt.title}은 [[{e}]]라는 이유로 다운받을 수 없습니다!", level="ERROR")
+                info(f"{yt.title}은(는) [[{e}]]라는 이유로 다운받을 수 없습니다!", level="ERROR")
                 return -1
 
             try:
@@ -287,7 +287,6 @@ def app():
                 info(f"{yt.title}를 다운로드 했습니다!\n\n")
             except FileExistsError:
                 print(f"이미 {yt.title}이(가) 있습니다!")
-                return -1
 
             # 추가 옵션
             if extract_subtitle.get():
@@ -304,9 +303,9 @@ def app():
 
                 caption = yt.captions['ko']
                 if caption is None:
-                    caption = yt.captions['ko']
+                    caption = yt.captions['en']
                     if caption is None:
-                        info(f"[경고] {yt.title}는 한글(또는 영어) 자막이 없습니다!", level="WARNING")
+                        info(f"{yt.title}는 한글(또는 영어) 자막이 없습니다!", level="WARNING")
                         return -1
 
                 f = open(f"{yt.download_path}/{yt.title}.lrc", "w", encoding="UTF-8")
@@ -348,7 +347,7 @@ def app():
                     ffmpeg.run(stream)  # 파일 출력
                     if os.path.isfile(f"{base}.mp4"):
                         os.remove(f"{base}.mp4")
-                    info(f"{yt.title}를 mp4에서 mp3로 변환했습니다!\n\n", level="DONE")
+                    info(f"{yt.title}을(를) mp4에서 mp3로 변환했습니다!\n\n", level="DONE")
                 except:
                     info(f"{yt.title}의 변환에 실패했습니다! ffmpeg 가 설치되어 있는지 확인해주세요!\n\n", level="ERROR")
                     return -1
@@ -385,14 +384,14 @@ def app():
                     info(f"이미 {yt.title}이(가) 있습니다!", level="WARNING")
 
             sema.acquire()
-            info(f"{yt.title}를 다운받습니다. \n길이는 {hourMinuteSecond(yt.length)} 입니다.", level="INFO")
+            info(f"{yt.title}을(를) 다운받습니다. \n길이는 {hourMinuteSecond(yt.length)} 입니다.", level="INFO")
 
             # 파일 스트리밍
             try:
                 streams = yt.streams
                 audio = streams.filter(only_audio=True, file_extension='mp4').order_by('abr').desc().first()
             except PytubeError as e:
-                info(f"{yt.title}은 [[{e}]]라는 이유로 다운받을 수 없습니다!", level="ERROR")
+                info(f"{yt.title}은(는) [[{e}]]라는 이유로 다운받을 수 없습니다!", level="ERROR")
                 return -1
 
             # 반드시 str을 이걸로 받아와야함.
@@ -400,7 +399,7 @@ def app():
             # 파일을 못 찾아서 절대로 확장자를 바꾸지 못함.
             try:
                 downloaded_file = audio.download(f"{yt.download_path}")
-                info(f"{yt.title}를 다운로드 했습니다!\n\n", level="DONE")
+                info(f"{yt.title}을(를) 다운로드 했습니다!\n\n", level="DONE")
             except FileExistsError:
                 info(f"이미 {yt.title}이(가) 있습니다!", level="WARNING")
 
@@ -423,7 +422,7 @@ def app():
             setModifier4YT()  # 파일 이름에 수식어 붙히기"
             space2Underbar4YT()  # 공백을 언더바(_)로
         except PytubeError as e:
-            info(f"{yt.watch_url}은 [[{e}]]라는 오류 때문에 다운받을 수 없습니다!!", level="ERROR")
+            info(f"{yt.watch_url}은(는) [[{e}]]라는 오류 때문에 다운받을 수 없습니다!!", level="ERROR")
             return -1
 
         createDirectory(yt.download_path)
@@ -541,7 +540,7 @@ def app():
     logger_box.tag_config('DEBUG', foreground='gray')
     logger_box.tag_config('WARNING', foreground='#b18460')
     logger_box.tag_config('ERROR', foreground='#e93b18', font=ft_error)
-    logger_box.tag_config('DONE', foreground='#5cb946', font=ft_done)
+    logger_box.tag_config('DONE', foreground='#376518', font=ft_done)
 
     # =========================================================
     # 1 page single_download_page
@@ -553,7 +552,7 @@ def app():
     ft = tkFont.Font(family=custom_font, size=10)
     youtube_link_label["font"] = ft
     youtube_link_label["justify"] = "left"
-    youtube_link_label["text"] = "Youtube Link (재생목록 가능)"
+    youtube_link_label["text"] = "Youtube Link를 넣어주세요 (is_play_list를 체크하면 재생목록을 다운받습니다.)"
     youtube_link_label.place(x=60, y=10, width=480, height=25)
 
     youtube_link_entry = Entry(single_download_page)
@@ -590,7 +589,7 @@ def app():
     is_playlist_checkbutton["font"] = ft
     is_playlist_checkbutton["justify"] = "left"
     is_playlist_checkbutton["text"] = " is_play_list?"
-    is_playlist_checkbutton.place(x=150, y=250, width=85, height=25)
+    is_playlist_checkbutton.place(x=150, y=250, width=125, height=25)
     is_playlist_checkbutton["variable"] = is_play_list
 
     open_folder_button = Button(single_download_page)
@@ -659,7 +658,7 @@ def app():
     is_playlist_check_button["justify"] = "left"
     is_playlist_check_button["text"] = " is_play_list?"
     is_playlist_check_button["relief"] = "flat"
-    is_playlist_check_button.place(x=150, y=250, width=85, height=25)
+    is_playlist_check_button.place(x=150, y=250, width=125, height=25)
     is_playlist_check_button["variable"] = is_play_list
 
     open_folder_button = Button(multiple_download_page)
@@ -707,6 +706,7 @@ def app():
     is_album_checkbutton.pack(anchor="w", padx="50", pady="3")
     set_cover_checkbutton.pack(anchor="w", padx="50", pady="3")
     extract_lyrics_file_checkbutton.pack(anchor="w", padx="50", pady="3")
+    Label(album_options_page, text="이 옵션을 사용한다면 cmd창이 계속 껏다 켜졌다 할 수 있지만\n 파일 변환 및 속성 추가를 하는 것이므로 너무 놀라지 마세요.").pack(anchor="w", padx="50", pady="10")
 
     # Init Combobox Value
     is_album.set(album_options["is_album"])
