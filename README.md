@@ -5,6 +5,8 @@
 
 ### 대략 설명
 
+어짜피 pytube 하나로 다 할 수 있으므로 CUI에 익숙하다면 pytube를 쓰자.
+
 pytube: https://github.com/pytube/pytube
 
 이거 만들면서 사용한 module
@@ -53,3 +55,12 @@ src 폴더 안에서
 이렇게 -w 하나 빼버리면 된다.
 pyinstaller에 대한 자세한 사항은
 https://pyinstaller.org/en/stable/usage.html#
+
+---
+
+### ffmpeg
+
+앨범 기능을 사용하려면 설치해야 한다. (기본으로 설치되지 않는다.)
+
+나는 이거 보고 설치했다.
+- https://root-blog.tistory.com/3
