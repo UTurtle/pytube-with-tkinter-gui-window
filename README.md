@@ -1,6 +1,10 @@
 # tkinter-pytube
 유튜브 프리미엄 이었지만 노래를 다운받지 못한 불쌍한 중생이 만든 것
 
+---
+
+### 대략 설명
+
 pytube: https://github.com/pytube/pytube
 
 이거 만들면서 사용한 module
@@ -30,3 +34,22 @@ pytube 사용할 때 도움 받은 곳
 
 pytube가 갑자기 안되길래 확인해봤더니 다음과 같은 문제였다는 있었다는 것
 - https://github.com/pytube/pytube/issues/1281
+
+---
+
+### Window로 사용할 수 있게 exe로 만들기
+
+pyinstaller 사용법은
+src 폴더 안에서
+
+`pyinstaller.exe .\tkinter_pytube.py -F -w --specpath ../output --distpath ../output/dist --workpath ../output/build`
+
+이렇게 명령어를 치면된다.
+
+근대 나는 console창을 보고 싶다 하면?
+
+`pyinstaller.exe .\tkinter_pytube.py -F --specpath ../output --distpath ../output/dist --workpath ../output/build`
+
+이렇게 -w 하나 빼버리면 된다.
+pyinstaller에 대한 자세한 사항은
+https://pyinstaller.org/en/stable/usage.html#
