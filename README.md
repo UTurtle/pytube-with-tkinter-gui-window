@@ -44,13 +44,13 @@ pytube가 갑자기 안되길래 확인해봤더니 다음과 같은 문제였�
 pyinstaller 사용법은
 src 폴더 안에서
 
-`pyinstaller.exe .\tkinter_pytube.py -F -w --specpath ../output --distpath ../output/dist --workpath ../output/build`
+`pyinstaller.exe .\__init__.py -F -w --specpath ../output --distpath ../output/dist --workpath ../output/build --name tkinter-pytube`
 
 이렇게 명령어를 치면된다.
 
 근대 나는 console창을 보고 싶다 하면?
 
-`pyinstaller.exe .\tkinter_pytube.py -F --specpath ../output --distpath ../output/dist --workpath ../output/build`
+`pyinstaller.exe .\__init__.py -F --specpath ../output --distpath ../output/dist --workpath ../output/build --name tkinter-pytube`
 
 이렇게 -w 하나 빼버리면 된다.
 pyinstaller에 대한 자세한 사항은
