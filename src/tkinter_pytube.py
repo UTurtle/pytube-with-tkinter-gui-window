@@ -274,6 +274,18 @@ def app():
         def videoDownload():
             """비디오 다운로드 (mp4)"""
 
+            def stopDownload():
+                """현재 쓰레드를 중단하기 전 sema에서 빠져나온다. 그리고 현재 대기중인 쓰레드를 말하고 죽는다."""
+                time.sleep(int(download_cooltime.get()))
+                sema.release()
+
+                # count 불러오기
+                global count
+                count += 1
+                info_label["text"] = f"프로그램을 키고부터 다운받은 파일의 갯수 :{count}\n 현재 대기중인 있는 쓰레드의 개수 :{threading.active_count()}"
+
+                return
+
             def extractSubtitle():
                 """확장자가 .smi인 파일을 추출"""
 
@@ -281,18 +293,16 @@ def app():
                 if caption is None:
                     caption = yt.captions.get_by_language_code('en')
                     if caption is None:
-                        info(f"{yt.title}는 한글(또는 영어) 자막이 없습니다!", level="WARNING")
-                        sema.release()
-                        return
+                        info(f"{yt.title}는 한글(또는 영어) 자막이 없습니다!\n\n", level="WARNING")
+                        stopDownload()
 
                 try:
                     f = open(rf"{yt.download_path}/{yt.title}.smi", "w", encoding="UTF-8")
                 except OSError:
-                    info(f"{yt.title}.smi 파일을 만들지 못했습니다!", level="ERROR")
-                    sema.release()
-                    return
+                    info(f"{yt.title}.smi 파일을 만들지 못했습니다!\n\n", level="ERROR")
+                    stopDownload()
 
-                info(f"{yt.title}의 자막을 들고옵니다!\n", level="INFO")
+                info(f"{yt.title}의 자막을 들고옵니다...", level="INFO")
 
                 f.write("<SAMI>\n<BODY>\n")
 
@@ -314,24 +324,24 @@ def app():
                     f.write(f"{tmp}")
                 f.write("\n</BODY>\n</SAMI>")
                 f.close()
-                info(f"{yt.title}의 자막을 성공적으로 가져왔습니다!\n", level="DONE")
+                info(f"{yt.title}의 자막을 성공적으로 가져왔습니다!\n\n", level="DONE")
 
             sema.acquire()
 
+            # count 불러오기
             global count
             count += 1
+            info_label["text"] = f"프로그램을 키고부터 다운받은 파일의 갯수 :{count}\n 현재 대기중인 있는 쓰레드의 개수 :{threading.active_count()}"
 
             info(f"{yt.title}을(를) 다운받습니다. \n길이는 {hourMinuteSecond(yt.length)} 입니다.", level="INFO")
-            info_label["text"] = f"프로그램을 키고부터 다운받은 파일의 갯수 :{count}\n 현재 돌아가고 있는 쓰레드의 개수 :{threading.active_count()}"
 
             # 파일 스트리밍
             try:
                 streams = yt.streams
                 video = streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
             except Exception as e:
-                info(f"{yt.title}은(는) [[{e}]]라는 이유로 다운받을 수 없습니다!", level="ERROR")
-                sema.release()
-                return
+                info(f"{yt.title}은(는) [[{e}]]라는 이유로 다운받을 수 없습니다!\n\n", level="ERROR")
+                stopDownload()
 
             try:
                 video.download(f"{yt.download_path}")
@@ -343,11 +353,15 @@ def app():
             if extract_subtitle.get():
                 extractSubtitle()  # 가사 추출
 
-            time.sleep(int(download_cooltime.get()))
-            sema.release()
+            stopDownload()
 
         def audioDownload():
             """노래 다운로드 (mp3)"""
+
+            def stopDownload():
+                time.sleep(int(download_cooltime.get()))
+                sema.release()
+                return
 
             def extractLyricsFile():
                 """확장자가 .lrc인 파일을 가져옴"""
@@ -356,16 +370,15 @@ def app():
                 if caption is None:
                     caption = yt.captions.get_by_language_code('en')
                     if caption is None:
-                        info(f"{yt.title}는 한글(또는 영어) 자막이 없습니다!", level="WARNING")
-                        return
+                        info(f"{yt.title}는 한글(또는 영어) 자막이 없습니다!\n\n", level="WARNING")
+                        stopDownload()
                 try:
                     f = open(rf"{yt.download_path}/{yt.title}.lrc", "w", encoding="UTF-8")
                 except OSError:
-                    info(f"{yt.title}.lrc 파일을 만들지 못했습니다!", level="ERROR")
-                    sema.release()
-                    return
+                    info(f"{yt.title}.lrc 파일을 만들지 못했습니다!\n\n", level="ERROR")
+                    stopDownload()
 
-                info(f"{yt.title}의 가사를 들고옵니다!\n", level="INFO")
+                info(f"{yt.title}의 가사를 들고옵니다!...", level="INFO")
 
                 metadata = getMetaData()
 
@@ -401,7 +414,7 @@ def app():
             def convertMp4Mp3():
                 base, ext = os.path.splitext(downloaded_file)
                 try:
-                    info(f"{yt.title}를 mp4에서 mp3로 변환을 시작합니다!\n", level="INFO")
+                    info(f"{yt.title}를 mp4에서 mp3로 변환을 시작합니다...", level="INFO")
                     video_file = ffmpeg.input(f"{base}.mp4")
                     audio_file = video_file.audio
                     stream = ffmpeg.output(audio_file, f"{base}.mp3")
@@ -410,13 +423,12 @@ def app():
                         os.remove(f"{base}.mp4")
                     info(f"{yt.title}을(를) mp4에서 mp3로 변환했습니다!\n", level="DONE")
                 except:
-                    info(f"{yt.title}의 변환에 실패했습니다! ffmpeg 가 설치되어 있는지 확인해주세요!\n", level="ERROR")
-                    sema.release()
-                    return
+                    info(f"{yt.title}의 변환에 실패했습니다! ffmpeg 가 설치되어 있는지 확인해주세요!\n\n", level="ERROR")
+                    stopDownload()
 
             def addAttributeMp3():  # TODO: 앨범 설정 추가
                 """mp3에 속성 추가"""
-                info(f"{yt.title}의 속성을 추가합니다!\n", level="INFO")
+                info(f"{yt.title}의 속성을 추가합니다...", level="INFO")
                 base, ext = os.path.splitext(downloaded_file)
                 audio_file = base + '.mp3'
                 mp3_thumbnail_path = base + '.jpg'
@@ -459,18 +471,17 @@ def app():
             # count 불러오기
             global count
             count += 1
+            info_label["text"] = f"프로그램을 키고부터 다운받은 파일의 갯수 :{count}\n 현재 대기중인 있는 쓰레드의 개수 :{threading.active_count()}"
 
-            info(f"{yt.title}을(를) 다운받습니다. \n길이는 {hourMinuteSecond(yt.length)} 입니다.", level="INFO")
-            info_label["text"] = f"프로그램을 키고부터 다운받은 파일의 갯수 :{count}\n 현재 돌아가고 있는 쓰레드의 개수 :{threading.active_count()}"
+            info(f"{yt.title}을(를) 다운받습니다... \n길이는 {hourMinuteSecond(yt.length)} 입니다.", level="INFO")
 
             # 파일 스트리밍
             try:
                 streams = yt.streams
                 audio = streams.filter(only_audio=True, file_extension='mp4').order_by('abr').desc().first()
             except Exception as e:
-                info(f"{yt.title}은(는) [[{e}]]라는 이유로 다운받을 수 없습니다!\n", level="ERROR")
-                sema.release()
-                return
+                info(f"{yt.title}은(는) [[{e}]]라는 이유로 다운받을 수 없습니다!\n\n", level="ERROR")
+                stopDownload()
 
             # 반드시 str을 이걸로 받아와야함.
             # f"{yt.download_path}/{yt.title}"은 보기에는 같을지언정 Win은 다르게 판정하여
@@ -491,8 +502,7 @@ def app():
             if extract_lyrics_file.get():
                 extractLyricsFile()  # 가사 추출
 
-            time.sleep(int(download_cooltime.get()))
-            sema.release()
+            stopDownload()
 
         try:  # 도중에 오류가 나면 이 파일을 다운 받을 수 없음
             yt.check_availability()  # 사용 가능한가?
