@@ -282,13 +282,17 @@ def app():
                     caption = yt.captions.get_by_language_code('en')
                     if caption is None:
                         info(f"{yt.title}는 한글(또는 영어) 자막이 없습니다!", level="WARNING")
-                        return -1
+                        sema.release()
+                        return
 
                 try:
                     f = open(rf"{yt.download_path}/{yt.title}.smi", "w", encoding="UTF-8")
                 except OSError:
                     info(f"{yt.title}.smi 파일을 만들지 못했습니다!", level="ERROR")
-                    return -1
+                    sema.release()
+                    return
+
+                info(f"{yt.title}의 자막을 들고옵니다!\n", level="INFO")
 
                 f.write("<SAMI>\n<BODY>\n")
 
@@ -317,16 +321,17 @@ def app():
             global count
             count += 1
 
-            info(f"{yt.title}을(를) 다운받습니다. \n길이는 {hourMinuteSecond(yt.length)} 입니다.\n", level="INFO")
+            info(f"{yt.title}을(를) 다운받습니다. \n길이는 {hourMinuteSecond(yt.length)} 입니다.", level="INFO")
             info_label["text"] = f"프로그램을 키고부터 다운받은 파일의 갯수 :{count}\n 현재 돌아가고 있는 쓰레드의 개수 :{threading.active_count()}"
 
             # 파일 스트리밍
             try:
                 streams = yt.streams
                 video = streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
-            except PytubeError as e:
+            except Exception as e:
                 info(f"{yt.title}은(는) [[{e}]]라는 이유로 다운받을 수 없습니다!", level="ERROR")
-                return -1
+                sema.release()
+                return
 
             try:
                 video.download(f"{yt.download_path}")
@@ -352,12 +357,15 @@ def app():
                     caption = yt.captions.get_by_language_code('en')
                     if caption is None:
                         info(f"{yt.title}는 한글(또는 영어) 자막이 없습니다!", level="WARNING")
-                        return -1
+                        return
                 try:
                     f = open(rf"{yt.download_path}/{yt.title}.lrc", "w", encoding="UTF-8")
                 except OSError:
                     info(f"{yt.title}.lrc 파일을 만들지 못했습니다!", level="ERROR")
-                    return -1
+                    sema.release()
+                    return
+
+                info(f"{yt.title}의 가사를 들고옵니다!\n", level="INFO")
 
                 metadata = getMetaData()
 
@@ -402,11 +410,13 @@ def app():
                         os.remove(f"{base}.mp4")
                     info(f"{yt.title}을(를) mp4에서 mp3로 변환했습니다!\n", level="DONE")
                 except:
-                    info(f"{yt.title}의 변환에 실패했습니다! ffmpeg 가 설치되어 있는지 확인해주세요!\n\n", level="ERROR")
-                    return -1
+                    info(f"{yt.title}의 변환에 실패했습니다! ffmpeg 가 설치되어 있는지 확인해주세요!\n", level="ERROR")
+                    sema.release()
+                    return
 
             def addAttributeMp3():  # TODO: 앨범 설정 추가
                 """mp3에 속성 추가"""
+                info(f"{yt.title}의 속성을 추가합니다!\n", level="INFO")
                 base, ext = os.path.splitext(downloaded_file)
                 audio_file = base + '.mp3'
                 mp3_thumbnail_path = base + '.jpg'
@@ -433,7 +443,7 @@ def app():
                     if os.path.isfile(mp3_thumbnail_path):
                         os.remove(mp3_thumbnail_path)
                 except Exception:
-                    info(f"{yt.title}의 속성 추가를 실패했습니다!", level="WARNING")
+                    info(f"{yt.title}의 속성 추가를 실패했습니다!\n", level="WARNING")
 
             def replaceMp4Mp3():
                 """mp4 -> mp3로 확장자 변경"""
@@ -442,10 +452,11 @@ def app():
                 try:
                     os.rename(downloaded_file, audio_file)
                 except FileExistsError:
-                    info(f"이미 {yt.title}이(가) 있습니다!", level="WARNING")
+                    info(f"이미 {yt.title}이(가) 있습니다!\n", level="WARNING")
 
             sema.acquire()
 
+            # count 불러오기
             global count
             count += 1
 
@@ -456,18 +467,19 @@ def app():
             try:
                 streams = yt.streams
                 audio = streams.filter(only_audio=True, file_extension='mp4').order_by('abr').desc().first()
-            except PytubeError as e:
-                info(f"{yt.title}은(는) [[{e}]]라는 이유로 다운받을 수 없습니다!", level="ERROR")
-                return -1
+            except Exception as e:
+                info(f"{yt.title}은(는) [[{e}]]라는 이유로 다운받을 수 없습니다!\n", level="ERROR")
+                sema.release()
+                return
 
             # 반드시 str을 이걸로 받아와야함.
             # f"{yt.download_path}/{yt.title}"은 보기에는 같을지언정 Win은 다르게 판정하여
             # 파일을 못 찾아서 절대로 확장자를 바꾸지 못함.
             try:
                 downloaded_file = audio.download(f"{yt.download_path}")
-                info(f"{yt.title}을(를) 다운로드 했습니다!\n\n", level="DONE")
+                info(f"{yt.title}을(를) 다운로드 했습니다!\n", level="DONE")
             except FileExistsError:
-                info(f"이미 {yt.title}이(가) 있습니다!", level="WARNING")
+                info(f"이미 {yt.title}이(가) 있습니다!\n", level="WARNING")
 
             # 추가 옵션
             if is_album.get():
@@ -489,14 +501,14 @@ def app():
             getDownloadPath4YT()  # 다운로드 경로 구하기"
             setModifier4YT()  # 파일 이름에 수식어 붙히기"
         except PytubeError as e:
-            info(f"{yt.watch_url}은(는) [[{e}]]라는 오류 때문에 다운받을 수 없습니다!!", level="ERROR")
-            return -1
+            info(f"{yt.watch_url}은(는) [[{e}]]라는 오류 때문에 다운받을 수 없습니다!!\n", level="ERROR")
+            return
 
         if not os.path.isdir(yt.download_path):
             try:
                 os.makedirs(yt.download_path)
             except FileNotFoundError:
-                info(f"{yt.title}의 다운로드 폴더 생성에 실패하여 그 상위 폴더에 파일을 다운받습니다.", level="WARNING")
+                info(f"{yt.title}의 다운로드 폴더 생성에 실패하여 그 상위 폴더에 파일을 다운받습니다.\n", level="WARNING")
                 yt.download_path = file_save_path_combobox.get()
 
         if is_audio.get():
@@ -807,7 +819,7 @@ def app():
     tabbar.add(download_options_page, text="Download Option")
 
     # Label
-    limit_amount_download_at_once_label = Label(download_options_page, text="한번에 얼마나 다운받을 것인가?")
+    limit_amount_download_at_once_label = Label(download_options_page, text="한번에 얼마나 다운받을 것인가? (재시작 필요) (중간에 오류나는 걸 생각해서 최소 2개 추천)")
     download_cooltime_label = Label(download_options_page, text="한번 다운받은 뒤 얼마나 기다렸다가 다운받을것인가? (단위는 초(s))")
     new_folder_name_option_label = Label(download_options_page, text="다음에 해당하는 이름으로 폴더를 생성해 다운받습니다.")
     modifier_option_label = Label(download_options_page, text="파일 이름에 붙힐 수식어")
@@ -872,4 +884,4 @@ def app():
 
 
 if __name__ == "__main__":
-    app()
+    pass
