@@ -34,7 +34,7 @@ def app():
     # =========================================================
     root: Tk = Tk()
     root.geometry("1100x550")
-    root.title("tkinter with pytube")
+    root.title("pytube with tkinter gui")
     root.resizable(width=False, height=False)
 
     # Constant
@@ -66,7 +66,7 @@ def app():
     # =========================================================
     # Loading LocalStorageValue
     # =========================================================
-    local_storage = localStoragePy('tkinter-pytube', 'json')
+    local_storage = localStoragePy('pytube_with_tkinter_gui', 'json')
 
     # loading file_path_history
     file_path_history = local_storage.getItem('file_path_history')
@@ -148,7 +148,7 @@ def app():
         now = datetime.now()
         nowTime = now.strftime('%H:%M:%S')
         logger_box.configure(state='normal')
-        logger_box.insert(END, "[{}] {}\n".format(nowTime, text), level)
+        logger_box.insert(END, "[[{}]] {}\n".format(nowTime, text), level)
         logger_box.configure(state='disabled')
         logger_box.see(END)
         print(text)
@@ -616,27 +616,27 @@ def app():
     ft = tkFont.Font(size=22, weight='bold')
     title_label["font"] = ft
     title_label["justify"] = "center"
-    title_label["text"] = "tkinter with pytube"
+    title_label["text"] = "pytube with tkinter gui"
     title_label["relief"] = "flat"
     title_label.place(x=0, y=0, width=600, height=50)
 
     file_save_path_label = Label(root)
-    ft = tkFont.Font(size=10)
+    ft = tkFont.Font(family=default_font, size=10)
     file_save_path_label["font"] = ft
     file_save_path_label["justify"] = "left"
-    file_save_path_label["text"] = "File Save Path"
+    file_save_path_label["text"] = "파일을 다운받을 위치 (경로)"
     file_save_path_label.place(x=60, y=50, width=480, height=25)
 
     file_explore_button = Button(root)
-    file_explore_button["text"] = "Browse Folder"
+    file_explore_button["text"] = "폴더 검색"
     file_explore_button["command"] = browseFolder
     file_explore_button.place(x=50, y=80, width=100, height=30)
 
     file_save_path_combobox = tkinter.ttk.Combobox(root)
-    ft = tkFont.Font(size=12)
+    ft = tkFont.Font(family=default_font, size=12)
     file_save_path_combobox["font"] = ft
     file_save_path_combobox["justify"] = "left"
-    file_save_path_combobox["text"] = "File Save Path"
+    file_save_path_combobox["text"] = "파일을 다운받을 위치 (경로)"
     file_save_path_combobox["values"] = file_path_history
     file_save_path_combobox.place(x=170, y=80, width=380, height=30)
     try:
@@ -740,9 +740,9 @@ def app():
     youtube_link_label = Label(multiple_download_page)
     ft = tkFont.Font(family=default_font, size=10)
     youtube_link_label["font"] = ft
-    youtube_link_label["justify"] = "left"
-    youtube_link_label["text"] = "유튜브 링크를 한줄씩 입력해 주세요"
-    youtube_link_label.place(x=60, y=10, width=480, height=25)
+    youtube_link_label["justify"] = "center"
+    youtube_link_label["text"] = "입력된 텍스트중 유튜브 링크들을 인식해서 다운받습니다. \n(유튜브 링크들이 서로 붙어있으면 인식하지 못합니다.)"
+    youtube_link_label.place(x=60, y=5, width=480, height=30)
 
     youtube_links_input_area = Text(multiple_download_page)
     youtube_links_input_area["borderwidth"] = "1px"
