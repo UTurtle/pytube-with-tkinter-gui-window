@@ -288,7 +288,9 @@ def app():
 
                 # count 불러오기
                 global count
-                info_label["text"] = f"프로그램을 키고부터 다운받기 시작한 파일의 갯수 :{count}\n 현재 대기중인 있는 쓰레드의 개수 :{threading.active_count()}"
+
+                # threading.active_count() -1 -1    자기 자신과 곧 죽을 쓰레드 제외
+                info_label["text"] = f"프로그램을 키고부터 다운받기 시작한 파일의 갯수 :{count}\n 현재 대기중인 있는 쓰레드의 개수 :{threading.active_count()-2}"
 
                 return -1
 
@@ -341,7 +343,7 @@ def app():
             # count 불러오기
             global count
             count += 1
-            info_label["text"] = f"프로그램을 키고부터 다운받기 시작한 파일의 갯수 :{count}\n 현재 대기중인 있는 쓰레드의 개수 :{threading.active_count()}"
+            info_label["text"] = f"프로그램을 키고부터 다운받기 시작한 파일의 갯수 :{count}\n 현재 대기중인 있는 쓰레드의 개수 :{threading.active_count()-1}"
 
             info(f"{yt.title}을(를) 다운받습니다. \n길이는 {hourMinuteSecond(yt.length)} 입니다.", level="INFO")
 
@@ -377,7 +379,9 @@ def app():
 
                 # count 불러오기
                 global count
-                info_label["text"] = f"프로그램을 키고부터 다운받기 시작한 파일의 갯수 :{count}\n 현재 대기중인 있는 쓰레드의 개수 :{threading.active_count()}"
+
+                # threading.active_count() -1 -1    자기 자신과 곧 죽을 쓰레드 제외
+                info_label["text"] = f"프로그램을 키고부터 다운받기 시작한 파일의 갯수 :{count}\n 현재 대기중인 있는 쓰레드의 개수 :{threading.active_count()-2}"
 
             def extractLyricsFile():
                 """확장자가 .lrc인 파일을 가져옴"""
@@ -492,7 +496,7 @@ def app():
             # count 불러오기
             global count
             count += 1
-            info_label["text"] = f"프로그램을 키고부터 다운받기 시작한 파일의 갯수 :{count}\n 현재 대기중인 있는 쓰레드의 개수 :{threading.active_count()}"
+            info_label["text"] = f"프로그램을 키고부터 다운받기 시작한 파일의 갯수 :{count}\n 현재 대기중인 있는 쓰레드의 개수 :{threading.active_count()-1}"
 
             info(f"{yt.title}을(를) 다운받습니다... \n길이는 {hourMinuteSecond(yt.length)} 입니다.", level="INFO")
 
@@ -640,7 +644,8 @@ def app():
     except:
         pass
 
-    info_label = Label(root, text=f"프로그램을 키고부터 다운받은 파일의 갯수 :{count}\n 현재 돌아가고 있는 쓰레드의 개수 :{threading.active_count()}\n (쓰레드의 갯수가 항상 다운받을 영상의 개수를 뜻하지는 않음.)")
+    # threading.active_count()-1 자기 자신이라는 쓰레드 제외
+    info_label = Label(root, text=f"프로그램을 키고부터 다운받은 파일의 갯수 :{count}\n 현재 돌아가고 있는 쓰레드의 개수 :{threading.active_count()-1}\n (쓰레드의 갯수가 항상 다운받을 영상의 개수를 뜻하지는 않음.)")
     info_label.place(x=50, y=115, width=500, height=50)
 
     # logger_box
