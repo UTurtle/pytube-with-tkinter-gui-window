@@ -48,13 +48,13 @@ requirements.txt를 한번에 다운받는 방법은 밑에 링크 참고
 pyinstaller 사용법은
 src 폴더 안에서
 
-`pyinstaller.exe .\__init__.py -F -w --specpath ../output --distpath ../output/dist --workpath ../output/build --name tkinter-pytube`
+`pyinstaller.exe .\__init__.py -F -w --specpath ../output --distpath ../output/dist --workpath ../output/build --name pytube-with-tkinter-gui`
 
 이렇게 명령어를 치면된다.
 
 근대 나는 console창을 보고 싶다 하면?
 
-`pyinstaller.exe .\__init__.py -F --specpath ../output --distpath ../output/dist --workpath ../output/build --name tkinter-pytube`
+`pyinstaller.exe .\__init__.py -F --specpath ../output --distpath ../output/dist --workpath ../output/build --name pytube-with-tkinter-gui`
 
 이렇게 -w 하나 빼버리면 된다.
 pyinstaller에 대한 자세한 사항은
