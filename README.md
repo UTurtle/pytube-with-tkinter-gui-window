@@ -5,6 +5,10 @@
 
 ### 대략 설명
 
+그냥 exe파일로 다운받고 싶다면?
+
+https://github.com/UTurtle/pytube-with-tkinter-gui/releases/tag/v0.0.1-alpha
+
 만약 프로젝트를 다운받아 보고 싶다면?
 
 `git clone https://github.com/UTurtle/pytube-with-tkinter-gui.git`
