@@ -24,6 +24,10 @@ import ffmpeg
 from datetime import datetime
 
 
+# 전역 변수
+count = 0
+
+
 def app():
     # =========================================================
     # before init
@@ -52,6 +56,7 @@ def app():
 
     # Download Options Variable
     is_space_2_underbar = BooleanVar()
+    is_adjust_title = BooleanVar()
     new_folder_name_option = StringVar()
     modifier_option = StringVar()
     limit_amount_download_at_once = IntVar()
@@ -98,6 +103,7 @@ def app():
             'new_folder_name_option': 'None',
             'modifier_option': 'None',
             'is_space_2_underbar': False,
+            'is_adjust_title': True,
         }
     else:
         download_options = ast.literal_eval(download_options)
@@ -119,6 +125,7 @@ def app():
         download_options["new_folder_name_option"] = str(new_folder_name_option.get())
         download_options["modifier_option"] = str(modifier_option.get())
         download_options["is_space_2_underbar"] = is_space_2_underbar.get()
+        download_options["is_adjust_title"] = is_adjust_title.get()
         local_storage.setItem('download_options', download_options)
 
         root.destroy()
@@ -149,12 +156,17 @@ def app():
         """하나의 추소를 받아서 유튜브 파일 다운로드"""
         url = youtube_link_entry.get()
 
-        if is_play_list.get():
+        def playlistDownload():
             p = Playlist(url)
             info(f"총 {len(p)}개의 영상을 다운받습니다.", level="INFO")
             for yt in p.videos:
                 yt.playlist_title = p.title
                 downloadYouTube(yt)
+
+        if is_play_list.get():
+            t = threading.Thread(target=playlistDownload)
+            t.start()
+            t.start()
         else:
             yt = YouTube(url)
             downloadYouTube(yt)
@@ -164,13 +176,18 @@ def app():
         text = youtube_links_input_area.get("1.0", 'end-1c')
         urls = urlFilter(text)
         info(f"총 {len(urls)}개의 URL을 확인했습니다.")
+
+        def playlistDownload():
+            p = Playlist(url)
+            info(f"{p.title}에서 총 {len(p)}개의 영상을 다운받습니다.", level="INFO")
+            for yt in p.videos:
+                yt.playlist_title = p.title
+                downloadYouTube(yt)
+
         for url in urls:
             if is_play_list.get():
-                p = Playlist(url)
-                info(f"{p.title}에서 총 {len(p)}개의 영상을 다운받습니다.", level="INFO")
-                for yt in p.videos:
-                    yt.playlist_title = p.title
-                    downloadYouTube(yt)
+                t = threading.Thread(target=playlistDownload)
+                t.start()
             else:
                 yt = YouTube(url)
                 downloadYouTube(yt)
@@ -181,13 +198,13 @@ def app():
         def getName(option, tag=None) -> str:
             """
             옵션에 해당하는 이름을 가져옴
-            :param option: str
+            :param option: str 'None', 'Playlist', 'Author', 'MetaData'
             :param tag: str 'Artist', 'Album', ‘Song’,
             """
             try:
                 options_dict = {
                     'None': unknown,
-                    'PlayList': yt.playlist_title if is_play_list.get() else unknown,
+                    'Playlist': yt.playlist_title if is_play_list.get() else unknown,
                     'Author': yt.author if yt.author else unknown,
                     'MetaData': yt.metadata[0][tag] if tag else unknown,
                 }
@@ -238,6 +255,21 @@ def app():
             """공백을 언더바(_)로"""
             if is_space_2_underbar.get():
                 yt.title = yt.title.replace(" ", "_")
+                if is_play_list.get():
+                    yt.playlist_title = yt.playlist_title.replace(" ", "_")
+
+        def adjustTitle4YT():
+            """파일 이름에 있는 /\'"를 없애기"""
+            if is_adjust_title.get():
+                yt.title = yt.title.replace("/", "")
+                yt.title = yt.title.replace("\"", "")
+                yt.title = yt.title.replace("\'", "")
+                yt.title = yt.title.replace("\\", "")
+                if is_play_list.get():
+                    yt.playlist_title = yt.playlist_title.replace("/", "")
+                    yt.playlist_title = yt.playlist_title.replace("\"", "")
+                    yt.playlist_title = yt.playlist_title.replace("\'", "")
+                    yt.playlist_title = yt.playlist_title.replace("\\", "")
 
         def videoDownload():
             """비디오 다운로드 (mp4)"""
@@ -252,7 +284,12 @@ def app():
                         info(f"{yt.title}는 한글(또는 영어) 자막이 없습니다!", level="WARNING")
                         return -1
 
-                f = open(f"{yt.download_path}/{yt.title}.smi", "w", encoding="UTF-8")
+                try:
+                    f = open(rf"{yt.download_path}/{yt.title}.smi", "w", encoding="UTF-8")
+                except OSError:
+                    info(f"{yt.title}.smi 파일을 만들지 못했습니다!", level="ERROR")
+                    return -1
+
                 f.write("<SAMI>\n<BODY>\n")
 
                 caption_xml = caption.xml_captions  # string 형식의 xml포멧 자막 파일 다운
@@ -265,14 +302,23 @@ def app():
                     if ms is False:
                         continue
                     str = tag.text
-                    str = ' '.join(str.split())
+                    if str:
+                        str = ' '.join(str.split())
+                    else:
+                        str = " "
                     tmp = f'\n<SYNC Start = {ms}>\n{str}<br>\n\n'
                     f.write(f"{tmp}")
                 f.write("\n</BODY>\n</SAMI>")
                 f.close()
+                info(f"{yt.title}의 자막을 성공적으로 가져왔습니다!\n", level="DONE")
 
             sema.acquire()
-            info(f"{yt.title}을(를) 다운받습니다. \n길이는 {hourMinuteSecond(yt.length)} 입니다.", level="INFO")
+
+            global count
+            count += 1
+
+            info(f"{yt.title}을(를) 다운받습니다. \n길이는 {hourMinuteSecond(yt.length)} 입니다.\n", level="INFO")
+            info_label["text"] = f"프로그램을 키고부터 다운받은 파일의 갯수 :{count}\n 현재 돌아가고 있는 쓰레드의 개수 :{threading.active_count()}"
 
             # 파일 스트리밍
             try:
@@ -284,7 +330,7 @@ def app():
 
             try:
                 video.download(f"{yt.download_path}")
-                info(f"{yt.title}를 다운로드 했습니다!\n\n", level="DONE")
+                info(f"{yt.title}를 다운로드 했습니다!\n", level="DONE")
             except FileExistsError:
                 print(f"이미 {yt.title}이(가) 있습니다!")
 
@@ -307,8 +353,11 @@ def app():
                     if caption is None:
                         info(f"{yt.title}는 한글(또는 영어) 자막이 없습니다!", level="WARNING")
                         return -1
-
-                f = open(f"{yt.download_path}/{yt.title}.lrc", "w", encoding="UTF-8")
+                try:
+                    f = open(rf"{yt.download_path}/{yt.title}.lrc", "w", encoding="UTF-8")
+                except OSError:
+                    info(f"{yt.title}.lrc 파일을 만들지 못했습니다!", level="ERROR")
+                    return -1
 
                 metadata = getMetaData()
 
@@ -333,9 +382,13 @@ def app():
                         continue
                     timing_tag = getTimingTag(int(ms))
                     str = tag.text
-                    str = ' '.join(str.split())
+                    if str:
+                        str = ' '.join(str.split())
+                    else:
+                        str = " "
                     f.write(f"{timing_tag} {str}\n")
                 f.close()
+                info(f"{yt.title}의 가사를 성공적으로 가져왔습니다!\n", level="DONE")
 
             def convertMp4Mp3():
                 base, ext = os.path.splitext(downloaded_file)
@@ -344,10 +397,10 @@ def app():
                     video_file = ffmpeg.input(f"{base}.mp4")
                     audio_file = video_file.audio
                     stream = ffmpeg.output(audio_file, f"{base}.mp3")
-                    ffmpeg.run(stream)  # 파일 출력
+                    ffmpeg.run(stream, overwrite_output=True)  # 파일 출력
                     if os.path.isfile(f"{base}.mp4"):
                         os.remove(f"{base}.mp4")
-                    info(f"{yt.title}을(를) mp4에서 mp3로 변환했습니다!\n\n", level="DONE")
+                    info(f"{yt.title}을(를) mp4에서 mp3로 변환했습니다!\n", level="DONE")
                 except:
                     info(f"{yt.title}의 변환에 실패했습니다! ffmpeg 가 설치되어 있는지 확인해주세요!\n\n", level="ERROR")
                     return -1
@@ -376,7 +429,7 @@ def app():
                                                        "album": f"{metadata.get('album')}",
                                                        "artist": f"{metadata.get('artist')}"
                                                    })
-                    info(f"{yt.title}의 속성 추가를 완료했습니다!\n\n", level="DONE")
+                    info(f"{yt.title}의 속성 추가를 완료했습니다!\n", level="DONE")
                     if os.path.isfile(mp3_thumbnail_path):
                         os.remove(mp3_thumbnail_path)
                 except Exception:
@@ -392,7 +445,12 @@ def app():
                     info(f"이미 {yt.title}이(가) 있습니다!", level="WARNING")
 
             sema.acquire()
+
+            global count
+            count += 1
+
             info(f"{yt.title}을(를) 다운받습니다. \n길이는 {hourMinuteSecond(yt.length)} 입니다.", level="INFO")
+            info_label["text"] = f"프로그램을 키고부터 다운받은 파일의 갯수 :{count}\n 현재 돌아가고 있는 쓰레드의 개수 :{threading.active_count()}"
 
             # 파일 스트리밍
             try:
@@ -426,14 +484,20 @@ def app():
 
         try:  # 도중에 오류가 나면 이 파일을 다운 받을 수 없음
             yt.check_availability()  # 사용 가능한가?
+            adjustTitle4YT()  # 파일 이름에 있는 / 지우기
+            space2Underbar4YT()  # 공백을 언더바(_)로
             getDownloadPath4YT()  # 다운로드 경로 구하기"
             setModifier4YT()  # 파일 이름에 수식어 붙히기"
-            space2Underbar4YT()  # 공백을 언더바(_)로
         except PytubeError as e:
             info(f"{yt.watch_url}은(는) [[{e}]]라는 오류 때문에 다운받을 수 없습니다!!", level="ERROR")
             return -1
 
-        createDirectory(yt.download_path)
+        if not os.path.isdir(yt.download_path):
+            try:
+                os.makedirs(yt.download_path)
+            except FileNotFoundError:
+                info(f"{yt.title}의 다운로드 폴더 생성에 실패하여 그 상위 폴더에 파일을 다운받습니다.", level="WARNING")
+                yt.download_path = file_save_path_combobox.get()
 
         if is_audio.get():
             t = threading.Thread(target=audioDownload)
@@ -441,11 +505,6 @@ def app():
         else:
             t = threading.Thread(target=videoDownload)
             t.start()
-
-    def createDirectory(path):
-        """디렉토리가 없다면 새로 만든다."""
-        if not os.path.isdir(path):
-            os.makedirs(path)
 
     def getTimingTag(millisecond) -> str:
         mm = millisecond // (1000 * 60)
@@ -525,7 +584,7 @@ def app():
     file_explore_button.place(x=50, y=80, width=100, height=30)
 
     file_save_path_combobox = tkinter.ttk.Combobox(root)
-    ft = tkFont.Font( size=12)
+    ft = tkFont.Font(size=12)
     file_save_path_combobox["font"] = ft
     file_save_path_combobox["justify"] = "left"
     file_save_path_combobox["text"] = "File Save Path"
@@ -535,6 +594,9 @@ def app():
         file_save_path_combobox.insert(0, file_path_history[-1])
     except:
         pass
+
+    info_label = Label(root, text=f"프로그램을 키고부터 다운받은 파일의 갯수 :{count}\n 현재 돌아가고 있는 쓰레드의 개수 :{threading.active_count()}\n (쓰레드의 갯수가 항상 다운받을 영상의 개수를 뜻하지는 않음.)")
+    info_label.place(x=50, y=115, width=500, height=50)
 
     # logger_box
     logger_box = ScrolledText(root, state='disabled', height=12)
@@ -751,6 +813,9 @@ def app():
     modifier_option_label = Label(download_options_page, text="파일 이름에 붙힐 수식어")
 
     # Entry
+    is_adjust_title_checkbutton = Checkbutton(download_options_page,
+                                                  text="영상이나 노래이름 속 /,\',\",\\를 제거합니다. (OS관련 Error에 걸릴 확률 감소)",
+                                                  variable=is_adjust_title)
     is_space_2_underbar_checkbutton = Checkbutton(download_options_page,
                                                   text="공백을 밑줄로 바꿉니다.",
                                                   variable=is_space_2_underbar)
@@ -774,7 +839,8 @@ def app():
     delete_setting_and_history["command"] = deleteSettingAndHistory
 
     # Layout
-    Label(download_options_page).pack(anchor="w", padx="50", pady="10")
+    Label(download_options_page).pack(anchor="w", padx="50", pady="3")
+    is_adjust_title_checkbutton.pack(anchor="w", padx="50", pady="3")
     is_space_2_underbar_checkbutton.pack(anchor="w", padx="50", pady="3")
     limit_amount_download_at_once_label.pack(anchor="w", padx="50", pady="3")
     limit_amount_download_at_once_combobox.pack(anchor="w", padx="50", pady="3")
@@ -787,6 +853,7 @@ def app():
     delete_setting_and_history.pack(anchor="w", padx="50", pady="3")
 
     # Init Entry Value
+    is_adjust_title.set(download_options["is_adjust_title"])
     is_space_2_underbar.set(download_options["is_space_2_underbar"])
     limit_amount_download_at_once_combobox.set(download_options["limit_amount_download_at_once"])
     download_cooltime_combobox.set(download_options["download_cooltime"])
