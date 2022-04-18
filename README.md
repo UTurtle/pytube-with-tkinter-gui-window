@@ -7,7 +7,7 @@
 
 만약 프로젝트를 다운받아 보고 싶다면?
 
-`git clone https://github.com/UTurtle/tkinter-pytube.git`
+`git clone https://github.com/UTurtle/pytube-with-tkinter-gui.git`
 
 어짜피 pytube 하나로 다 할 수 있으므로 CUI에 익숙하다면 pytube를 쓰자.
 
