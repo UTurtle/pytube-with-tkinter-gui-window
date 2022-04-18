@@ -66,7 +66,7 @@ def app():
     # =========================================================
     # Loading LocalStorageValue
     # =========================================================
-    local_storage = localStoragePy('youtube_downloader', 'json')
+    local_storage = localStoragePy('tkinter-pytube', 'json')
 
     # loading file_path_history
     file_path_history = local_storage.getItem('file_path_history')
@@ -612,7 +612,7 @@ def app():
     ft = tkFont.Font(size=22, weight='bold')
     title_label["font"] = ft
     title_label["justify"] = "center"
-    title_label["text"] = "Simple Youtube Downloader"
+    title_label["text"] = "tkinter with pytube"
     title_label["relief"] = "flat"
     title_label.place(x=0, y=0, width=600, height=50)
 
