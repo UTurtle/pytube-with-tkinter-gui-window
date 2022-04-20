@@ -156,6 +156,7 @@ def app():
     def deleteBannedName(name) -> str:
         if name is not None:
             name = re.sub(banned_character, '', name)
+            name = name.replace('\\', '')
         return name
 
     def singleDownloadCommand():
