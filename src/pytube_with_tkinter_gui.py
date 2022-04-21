@@ -210,7 +210,7 @@ def app():
     def downloadYouTube(yt):
         """유튜브 파일 다운로드"""
 
-        def getName(option, tag=False) -> str:
+        def getName(option, tag=None) -> str:
             """
             옵션에 해당하는 이름을 가져옴
             :param option: str 'None', 'Playlist', 'Author', 'MetaData'
@@ -235,14 +235,14 @@ def app():
                 'album': getName('MetaData', tag='Album'),
                 'title': getName('MetaData', tag='Song')
             }
-            metadata['artist'] = metadata['artist'] if not metadata['artist'] is unknown else yt.author
-            metadata['title'] = metadata['title'] if not metadata['title'] is unknown else yt.title
+
+            metadata['artist'] = metadata['artist'] if not (metadata['artist'] is unknown) else yt.author
+            metadata['title'] = metadata['title'] if not (metadata['title'] is unknown) else yt.title
 
             if is_play_list.get():
-                metadata['album'] = metadata['album'] if not metadata['album'] is unknown else yt.playlist_title
+                metadata['album'] = metadata['album'] if not (metadata['album'] is unknown) else yt.playlist_title
             else:
-                metadata['album'] = metadata['album'] if not metadata['album'] is unknown else ""
-
+                metadata['album'] = metadata['album'] if not (metadata['album'] is unknown) else ""
             return metadata
 
         def getDownloadPath4YT():
@@ -539,7 +539,7 @@ def app():
 
         try:  # 도중에 오류가 나면 이 파일을 다운 받을 수 없음
             yt.check_availability()  # 사용 가능한가?
-            setAlbumName4YT()
+            setAlbumName4YT()  # 파일 이름을 앨범 이름으로 바꿀 것인가?
             adjustTitle4YT()  # 파일 이름에 있는 / 지우기
             space2Underbar4YT()  # 공백을 언더바(_)로
             getDownloadPath4YT()  # 다운로드 경로 구하기"
