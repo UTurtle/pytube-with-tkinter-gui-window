@@ -210,7 +210,7 @@ def app():
     def downloadYouTube(yt):
         """유튜브 파일 다운로드"""
 
-        def getName(option, tag=None) -> str:
+        def getName(option, tag=False) -> str:
             """
             옵션에 해당하는 이름을 가져옴
             :param option: str 'None', 'Playlist', 'Author', 'MetaData'
@@ -232,17 +232,16 @@ def app():
         def getMetaData() -> dict[str, str]:
             metadata = {
                 'artist': getName('MetaData', tag='Artist'),
-                'album': getName('MetaData', tag='Artist'),
+                'album': getName('MetaData', tag='Album'),
                 'title': getName('MetaData', tag='Song')
             }
-
-            metadata['artist'] = metadata['artist'] if not unknown else yt.author
-            metadata['title'] = metadata['title'] if not unknown else yt.title
+            metadata['artist'] = metadata['artist'] if not metadata['artist'] is unknown else yt.author
+            metadata['title'] = metadata['title'] if not metadata['title'] is unknown else yt.title
 
             if is_play_list.get():
-                metadata['album'] = metadata['album'] if not unknown else yt.playlist_title
+                metadata['album'] = metadata['album'] if not metadata['album'] is unknown else yt.playlist_title
             else:
-                metadata['album'] = metadata['album'] if not unknown else ""
+                metadata['album'] = metadata['album'] if not metadata['album'] is unknown else ""
 
             return metadata
 
@@ -278,6 +277,12 @@ def app():
                 yt.title = deleteBannedName(yt.title)
                 if is_play_list.get():
                     yt.playlist_title = deleteBannedName(yt.playlist_title)
+
+        def setAlbumName4YT():
+            """만약 YouTube metadata의 노래 제목이 따로 존재한다면 그것을 제목으로 바꿈."""
+            if is_album.get():
+                metadata = getMetaData()
+                yt.title = metadata.get('title')
 
         def videoDownload():
             """비디오 다운로드 (mp4)"""
@@ -534,6 +539,7 @@ def app():
 
         try:  # 도중에 오류가 나면 이 파일을 다운 받을 수 없음
             yt.check_availability()  # 사용 가능한가?
+            setAlbumName4YT()
             adjustTitle4YT()  # 파일 이름에 있는 / 지우기
             space2Underbar4YT()  # 공백을 언더바(_)로
             getDownloadPath4YT()  # 다운로드 경로 구하기"
