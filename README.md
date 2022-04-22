@@ -83,3 +83,6 @@ GUI 만들 때 도움 받은 곳
 pytube 사용할 때 도움 받은 곳
 - https://m.blog.naver.com/dsz08082/221753467977
 - https://pytube.io/en/latest/
+
+아 이것도 3천번~5천번 정도 다운받다 보면 `urllib.error.HTTPError: HTTP Error 429: Too Many Requests` 와 같은 Error가 뜨는데
+그건 당신이 하도 영상을 다운받으니까 작작 다운받으라는 소리이므로 그럴때는 좀 시간이 지나서 쿨타임 좀 키고 영상 다운받으시는걸 추천드립니다.
