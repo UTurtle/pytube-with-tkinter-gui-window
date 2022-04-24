@@ -210,7 +210,7 @@ def app():
     def downloadYouTube(yt):
         """유튜브 파일 다운로드"""
 
-        def getName(option, tag=False) -> str:
+        def getName(option, tag=None) -> str:
             """
             옵션에 해당하는 이름을 가져옴
             :param option: str 'None', 'Playlist', 'Author', 'MetaData'
