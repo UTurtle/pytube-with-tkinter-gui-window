@@ -221,10 +221,12 @@ def app():
                     'None': unknown,
                     'Playlist': yt.playlist_title if is_play_list.get() else unknown,
                     'Author': yt.author if yt.author else unknown,
-                    'MetaData': yt.metadata[0][tag] if tag else unknown,
+                    'MetaData': yt.metadata[0][tag] if tag else unknown
                 }
                 name = options_dict.get(option)
             except IndexError:
+                name = unknown
+            except KeyError:
                 name = unknown
             name = str(name)
             return name

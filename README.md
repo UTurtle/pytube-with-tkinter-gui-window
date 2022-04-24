@@ -1,13 +1,13 @@
 # pytube-with-tkinter-gui
-유튜브 프리미엄 이었지만 노래를 다운받지 못한 불쌍한 중생이 만든 것
+유튜브 프리미엄 이었지만 노래를 다운받지 못한 불쌍한 중생이 만든 것 (그래도 폰 새걸로 바꾸니까 다운받아지긴 하더라.)
 
 ---
 
 ### 대략 설명
 
-그냥 exe파일로 다운받고 싶다면?
+그냥 exe파일 로 다운받고 싶다면?
 
-https://github.com/UTurtle/pytube-with-tkinter-gui/releases/tag/v0.0.1-alpha
+[pytube-with-tkinter-gui 다운로드](https://github.com/UTurtle/pytube-with-tkinter-gui/releases/)
 
 만약 프로젝트를 다운받아 보고 싶다면?
 
@@ -34,6 +34,10 @@ pytube: https://github.com/pytube/pytube
 - ffmpeg-python
 - pyinstaller
 - 나머지는 requirements.txt 참고
+
+대부분 MIT나 apache 라이센스 package를 사용했다고는 생각하지만 혹시 다른곳에 사용할 거라면 
+requirements의 라이선스는 확인하자.
+(여기에 있는 코드를 사용함으로써 생기는 불이득은 책임져주지 않을것이다.)
 
 requirements.txt를 한번에 다운받는 방법은 밑에 링크 참고
 - https://2siwon.github.io/pip/2017/09/25/pip-002-pip-freeze.html
@@ -70,10 +74,22 @@ https://pyinstaller.org/en/stable/usage.html#
 
 앨범 기능을 사용하려면 설치해야 한다. (기본으로 설치되지 않는다.)
 
-나는 이거 보고 설치했다.
+나는 이걸보고 설치했다.
 - https://root-blog.tistory.com/3
 
 ---
+
+### 이슈 관련
+
+##### HTTP Error 429: Too Many Requests
+
+이것도 3천번~5천번 정도 다운받다 보면 `urllib.error.HTTPError: HTTP Error 429: Too Many Requests` 와 같은 Error가 뜨는데
+그건 하도 영상을 다운받으니까 작작 다운받으라는 소리이므로 그럴때는 좀 시간이 지나서 쿨타임 좀 키고 다시 다운받으면 된다.
+(아니면 IP를 바꿔도 된다.)
+
+**다른 이슈는 알아서 Fork하거나 Clone해서 해결해주시면 감사하겠습니다.**
+
+(국가의 부름에 의하여 1년 6개월동안 못 돌아오므로 Pull Request도 못볼 가능성이 농후합니다.)
 
 ### 참고
 
