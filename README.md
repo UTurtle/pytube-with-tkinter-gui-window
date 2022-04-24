@@ -1,4 +1,4 @@
-# pytube-with-tkinter-gui
+# pytube-with-tkinter-gui-
 유튜브 프리미엄 이었지만 노래를 다운받지 못한 불쌍한 중생이 만든 것 (그래도 폰 새걸로 바꾸니까 다운받아지긴 하더라.)
 
 ---
