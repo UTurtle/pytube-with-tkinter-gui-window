@@ -7,7 +7,7 @@
 
 그냥 exe파일로 다운받고 싶다면?
 
-https://github.com/UTurtle/pytube-with-tkinter-gui/releases/tag/v0.0.1-alpha
+https://github.com/UTurtle/pytube-with-tkinter-gui/releases/
 
 만약 프로젝트를 다운받아 보고 싶다면?
 
@@ -70,10 +70,21 @@ https://pyinstaller.org/en/stable/usage.html#
 
 앨범 기능을 사용하려면 설치해야 한다. (기본으로 설치되지 않는다.)
 
-나는 이거 보고 설치했다.
+나는 이걸보고 설치했다.
 - https://root-blog.tistory.com/3
 
 ---
+
+### 이슈 관련
+
+##### HTTP Error 429: Too Many Requests
+
+이것도 3천번~5천번 정도 다운받다 보면 `urllib.error.HTTPError: HTTP Error 429: Too Many Requests` 와 같은 Error가 뜨는데
+그건 하도 영상을 다운받으니까 작작 다운받으라는 소리이므로 그럴때는 좀 시간이 지나서 쿨타임 좀 키고 영상 다운받으시는걸 추천드립니다.
+
+나머지 이슈는 알아서 Fork하거나 Clone해서 해결해주시면 감사하겠습니다.
+
+(국가의 부름에 의하여 1년 6개월동안 못 돌아오므로)
 
 ### 참고
 
@@ -83,6 +94,3 @@ GUI 만들 때 도움 받은 곳
 pytube 사용할 때 도움 받은 곳
 - https://m.blog.naver.com/dsz08082/221753467977
 - https://pytube.io/en/latest/
-
-아 이것도 3천번~5천번 정도 다운받다 보면 `urllib.error.HTTPError: HTTP Error 429: Too Many Requests` 와 같은 Error가 뜨는데
-그건 당신이 하도 영상을 다운받으니까 작작 다운받으라는 소리이므로 그럴때는 좀 시간이 지나서 쿨타임 좀 키고 영상 다운받으시는걸 추천드립니다.
