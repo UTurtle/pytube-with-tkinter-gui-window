@@ -35,6 +35,10 @@ pytube: https://github.com/pytube/pytube
 - pyinstaller
 - 나머지는 requirements.txt 참고
 
+
+pyinstaller는 Window의 exe파일로 추출할 때만 사용하므로 실제 코드에 포함되지 않는다.
+
+
 대부분 MIT나 apache 라이센스 package를 사용했다고는 생각하지만 혹시 다른곳에 사용할 거라면 
 requirements의 라이선스는 확인하자.
 (여기에 있는 코드를 사용함으로써 생기는 불이득은 책임져주지 않을것이다.)
