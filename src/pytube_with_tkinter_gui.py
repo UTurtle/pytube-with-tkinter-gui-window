@@ -12,7 +12,9 @@ import threading
 import os.path
 
 from pydub import AudioSegment
-from pytube import YouTube
+from pytubefix import YouTube
+from pytubefix.cli import on_progress
+
 from pytube import Playlist
 from tkinter import filedialog
 from localStoragePy import localStoragePy
@@ -39,7 +41,7 @@ def app():
 
     # Constant
     unknown = "unknown"
-    banned_character = r'[\/:*?"<>|]' # 특수 문자들로, 파일 이름으로 사용할 수 없는 문자들
+    banned_character = r'[\/:*?"<>|]'
     default_font = "Segoe ui"
 
     # Variable
@@ -50,10 +52,10 @@ def app():
     # Album Option Variable
     is_album = BooleanVar()
     set_cover = BooleanVar()
-    extract_lyrics_file = BooleanVar() 
+    extract_lyrics_file = BooleanVar()  # TODO: 노래 가사 파일 추출 .lrc
 
     # Video Option Variable
-    extract_subtitle = BooleanVar() 
+    extract_subtitle = BooleanVar()  # TODO: 동영상 자막 파일 추출
 
     # Download Options Variable
     is_space_2_underbar = BooleanVar()
@@ -66,42 +68,48 @@ def app():
     # =========================================================
     # Loading LocalStorageValue
     # =========================================================
-    def load_local_storage_item(local_storage, item_key, default_value):
-        item = local_storage.getItem(item_key)
-        if item is None:
-            return default_value
-        else:
-            return ast.literal_eval(item)
-
     local_storage = localStoragePy('pytube_with_tkinter_gui', 'json')
 
     # loading file_path_history
-    file_path_history = load_local_storage_item(local_storage, 'file_path_history', [])
+    file_path_history = local_storage.getItem('file_path_history')
+    if file_path_history is None:
+        file_path_history = []
+    else:
+        file_path_history = ast.literal_eval(file_path_history)
 
     # loading album options
-    default_album_options = {
-        'is_album': False,
-        'set_cover': False,
-        'extract_lyrics_file': False,
-    }
-    album_options = load_local_storage_item(local_storage, 'album_options', default_album_options)
+    album_options = local_storage.getItem('album_options')
+    if album_options is None:
+        album_options = {
+            'is_album': False,
+            'set_cover': False,
+            'extract_lyrics_file': False,
+        }
+    else:
+        album_options = ast.literal_eval(album_options)
 
     # loading video options
-    default_video_options = {
-        'extract_subtitle': False,
-    }
-    video_options = load_local_storage_item(local_storage, 'video_options', default_video_options)
+    video_options = local_storage.getItem('video_options')
+    if video_options is None:
+        video_options = {
+            'extract_subtitle': False,
+        }
+    else:
+        video_options = ast.literal_eval(video_options)
 
     # loading download options
-    default_download_options = {
-        'limit_amount_download_at_once': 1,
-        'download_cooltime': 0,
-        'new_folder_name_option': 'None',
-        'modifier_option': 'None',
-        'is_space_2_underbar': False,
-        'is_adjust_title': True,
-    }
-    download_options = load_local_storage_item(local_storage, 'download_options', default_download_options)
+    download_options = local_storage.getItem('download_options')
+    if download_options is None:
+        download_options = {
+            'limit_amount_download_at_once': 1,
+            'download_cooltime': 0,
+            'new_folder_name_option': 'None',
+            'modifier_option': 'None',
+            'is_space_2_underbar': False,
+            'is_adjust_title': True,
+        }
+    else:
+        download_options = ast.literal_eval(download_options)
 
     def onClosing():
         """프로그램을 닫았을 때"""
@@ -151,6 +159,7 @@ def app():
         if name is not None:
             name = re.sub(banned_character, '', name)
             name = name.replace('\\', '')
+            name = name.replace(" ", "_")
         return name
 
     def singleDownloadCommand():
@@ -165,7 +174,7 @@ def app():
                 downloadYouTube(yt)
 
         def makeThread4YouTubeDownload():
-            yt = YouTube(url)
+            yt = YouTube(url , on_progress_callback = on_progress)
             downloadYouTube(yt)
 
         if is_play_list.get():
@@ -189,7 +198,7 @@ def app():
                 downloadYouTube(yt)
 
         def makeThread4YouTubeDownload():
-            yt = YouTube(url)
+            yt = YouTube(url , on_progress_callback = on_progress)
             downloadYouTube(yt)
 
         for url in urls:
@@ -223,6 +232,7 @@ def app():
             except KeyError:
                 name = unknown
             name = str(name)
+            name = deleteBannedName(name)
             return name
 
         def getMetaData() -> dict[str, str]:
@@ -257,7 +267,7 @@ def app():
             option = modifier_option.get()
             name = getName(option)
             if name != unknown:
-                yt.title = f"{yt.title}-{name}"
+                yt.title = f"{yt.title}/{name}"
             return yt
 
         def space2Underbar4YT():
@@ -397,16 +407,16 @@ def app():
                             info(f"{yt.title}는 한글(또는 영어, 일본어) 가사가 없습니다!\n\n", level="WARNING")
                             stopDownload()
                             return -1
-                        
+
                 try:
-                    info(f"{yt.download_path}/{yt.title}.lrc  ", )
-                    f = open(f"{yt.download_path}/{yt.title}.lrc", "w", encoding="UTF-8")
+                    f = open(rf"{yt.download_path}/{yt.title}.lrc", "w", encoding="UTF-8")
                     info(f"{yt.title}의 가사를 들고옵니다!...", level="INFO")
-                    metadata = getMetaData()
                 except OSError:
                     info(f"{yt.title}.lrc 파일을 만들지 못했습니다!\n\n", level="ERROR")
                     stopDownload()
                     return -1
+
+                metadata = getMetaData()
 
                 id_tags = f"""
 [ar:{metadata.get('artist')}]
@@ -927,4 +937,4 @@ def app():
 
 
 if __name__ == "__main__":
-    pass
+    app()
